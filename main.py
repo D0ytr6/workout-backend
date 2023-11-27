@@ -9,10 +9,10 @@ app = FastAPI(title="workout-backend-app")
 
 
 # create tables in async mode
-@app.on_event("startup")
-async def on_startup():
-    await init_db()
-
+# @app.on_event("startup")
+# async def on_startup():
+#     await init_db()
+#
 
 # create the instance for the routes
 main_api_router = APIRouter()

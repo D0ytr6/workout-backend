@@ -1,4 +1,5 @@
 import uuid
+from xmlrpc.client import Boolean
 
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -16,3 +17,4 @@ class User(Base):
     username = Column(String, unique=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+
