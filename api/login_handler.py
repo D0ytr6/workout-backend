@@ -49,11 +49,26 @@ async def get_current_user_from_token(token: str = Depends(oauth2_scheme),
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    token_expiration_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Access token is inspired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
+
+        exp_time = payload.get("exp")
+        exp_date = datetime.fromtimestamp(exp_time)
+
+        if datetime.utcnow() > exp_date:
+            raise token_expiration_exception
+
         if username is None:
             raise credentials_exception
+
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
@@ -89,6 +104,7 @@ async def authenticate_user(
 async def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ):
+    # if user exist and passwords equals
     user = await authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
@@ -97,7 +113,7 @@ async def login_for_access_token(
         )
 
     # Generate new access token
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES_TEST)
     access_token = create_access_token(
         data={"sub": user.username, },
         expires_delta=access_token_expires,
@@ -122,8 +138,11 @@ def refresh_access_token(refresh_token: str = Depends(OAuth2PasswordBearer(token
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
+        # decode jwt and get a user
+        # don't check other params
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
+
         if username is None:
             raise credentials_exception
     except JWTError:
