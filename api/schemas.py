@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr
 # pydantic models for encapsulating request body or response body
 
 class UserBase(BaseModel):
-    nick_name: str
+    username: str
     email: EmailStr
 
 
@@ -20,3 +20,13 @@ class UserShow(UserBase):
     class Config:
         # convert obj to json
         orm_mode = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    refresh_token: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None

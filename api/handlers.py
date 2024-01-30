@@ -14,6 +14,10 @@ from db.session import get_db
 # router for operation with user
 user_router = APIRouter()
 
+# TODO save hashed password
+# TODO add hashing methods
+# TODO add logging
+# TODO add validator, regex
 
 # shadow logic
 async def _create_user(body: UserCreate, db: AsyncSession) -> UserShow:
@@ -23,7 +27,7 @@ async def _create_user(body: UserCreate, db: AsyncSession) -> UserShow:
             user = await dal.create_user(body)
             return UserShow(
                 user_id=user.id,
-                nick_name=user.username,
+                username=user.username,
                 email=user.email
             )
 
